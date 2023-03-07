@@ -1,6 +1,8 @@
 import Image from "next/image";
 
 import { GetStaticProps } from "next";
+import Link from "next/link";
+
 import { useKeenSlider } from "keen-slider/react";
 import { stripe } from "../lib/stripe";
 
@@ -14,7 +16,7 @@ interface HomeProps {
     id: string;
     name: string;
     imageUrl: string;
-    price: number;
+    price: string;
   }[];
 }
 
@@ -30,21 +32,23 @@ export default function Home({ products }: HomeProps) {
     <HomeContainer ref={sliderRef} className="keen-slider">
       {products.map((product) => {
         return (
-          <Product key={product.id} className="keen-slider__slide">
-            <Image
-              src={product.imageUrl}
-              width={520}
-              height={480}
-              alt="camiseta1"
-              placeholder="blur"
-              blurDataURL="/assets/camisetas/1.png"
-            />
+          <Link key={product.id} href={`/product/${product.id}`} prefetch={false}>
+            <Product className="keen-slider__slide">
+              <Image
+                src={product.imageUrl}
+                width={520}
+                height={480}
+                alt="camiseta1"
+                placeholder="blur"
+                blurDataURL="/assets/camisetas/1.png"
+              />
 
-            <footer>
-              <strong>{product.name}</strong>
-              <span>{product.price}</span>
-            </footer>
-          </Product>
+              <footer>
+                <strong>{product.name}</strong>
+                <span>{product.price}</span>
+              </footer>
+            </Product>
+          </Link>
         );
       })}
     </HomeContainer>
@@ -59,17 +63,14 @@ export const getStaticProps: GetStaticProps = async () => {
   const products = response.data.map((product) => {
     const price = product.default_price as Stripe.Price;
 
-    const unitAmount = typeof price.unit_amount === 'number' ? price.unit_amount : 0;
-    const priceInDollars = unitAmount / 100;
-
     return {
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
-      price: new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(priceInDollars),
+      price: new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(price.unit_amount / 100),
     };
   });
 
