@@ -4,6 +4,7 @@ import {
   ProductContainer,
   ProductDetails,
 } from "@/src/styles/pages/product";
+import Head from "next/head";
 import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/image";
@@ -44,28 +45,33 @@ export default function Product({ product }: ProductProps) {
   }
 
   return (
-    <ProductContainer>
-      <ImageContainer>
-        <Image
-          src={product.imageUrl}
-          width={520}
-          height={480}
-          alt="camiseta1"
-          placeholder="blur"
-          blurDataURL="/assets/camisetas/1.png"
-        />
-      </ImageContainer>
+    <>
+      <Head>
+        <title>{product.name} - Ignite Shop</title>
+      </Head>
+      <ProductContainer>
+        <ImageContainer>
+          <Image
+            src={product.imageUrl}
+            width={520}
+            height={480}
+            alt="camiseta1"
+            placeholder="blur"
+            blurDataURL="/assets/camisetas/1.png"
+          />
+        </ImageContainer>
 
-      <ProductDetails>
-        <h1>{product.name}</h1>
-        <span>{product.price}</span>
-        <p>{product.description}</p>
+        <ProductDetails>
+          <h1>{product.name}</h1>
+          <span>{product.price}</span>
+          <p>{product.description}</p>
 
-        <button disabled={isCreatingCheckoutSection} onClick={handleBuyProduct}>
-          Comprar agora
-        </button>
-      </ProductDetails>
-    </ProductContainer>
+          <button disabled={isCreatingCheckoutSection} onClick={handleBuyProduct}>
+            Comprar agora
+          </button>
+        </ProductDetails>
+      </ProductContainer>
+    </>
   );
 }
 
