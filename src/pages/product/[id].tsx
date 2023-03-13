@@ -4,9 +4,10 @@ import {
   ProductContainer,
   ProductDetails,
 } from "@/src/styles/pages/product";
+import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { useState } from "react";
 import Stripe from "stripe";
 
 interface ProductProps {
@@ -16,10 +17,32 @@ interface ProductProps {
     imageUrl: string;
     price: string;
     description: string;
+    defaultPriceId: string;
   };
 }
 
 export default function Product({ product }: ProductProps) {
+  const [isCreatingCheckoutSection, setIsCreatingCheckoutSection] =
+    useState(false);
+
+  async function handleBuyProduct() {
+    try {
+      setIsCreatingCheckoutSection(true);
+      
+      const response = await axios.post("/api/checkout", {
+        priceId: product.defaultPriceId,
+      });
+
+      const { checkoutUrl } = response.data;
+
+      window.location.href = checkoutUrl;
+    } catch {
+      setIsCreatingCheckoutSection(false);
+
+      console.log("falha ao redirecionar ao checkout");
+    }
+  }
+
   return (
     <ProductContainer>
       <ImageContainer>
@@ -38,7 +61,9 @@ export default function Product({ product }: ProductProps) {
         <span>{product.price}</span>
         <p>{product.description}</p>
 
-        <button>Comprar agora</button>
+        <button disabled={isCreatingCheckoutSection} onClick={handleBuyProduct}>
+          Comprar agora
+        </button>
       </ProductDetails>
     </ProductContainer>
   );
@@ -47,7 +72,7 @@ export default function Product({ product }: ProductProps) {
 export const getStaticPaths: GetStaticPaths = async () => {
   return {
     paths: [{ params: { id: "prod_NRq5WhWY6M4rfa" } }],
-    fallback: 'blocking',
+    fallback: "blocking",
   };
 };
 
@@ -73,6 +98,7 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
           currency: "BRL",
         }).format(price.unit_amount / 100),
         description: product.description,
+        defaultPriceId: price.id,
       },
     },
     revalidate: 60 * 60 * 1, // 1h
