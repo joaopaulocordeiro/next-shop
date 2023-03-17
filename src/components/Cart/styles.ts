@@ -19,6 +19,15 @@ export const CartContainer = styled(Dialog.Content, {
         fontSize: '$lg,',
         color: '$gray100',
         marginBottom: '2rem'
+    },
+
+    '> section': {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        gap: '1.5rem',
+        overflowY: 'auto'
+
     }
 
 })

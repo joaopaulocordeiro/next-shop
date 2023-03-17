@@ -2,22 +2,18 @@ import Image from "next/image";
 import Head from "next/head";
 import { GetStaticProps } from "next";
 import Link from "next/link";
-
-import { stripe } from "../lib/stripe";
-
-import { HomeContainer, Product, SliderContainer } from "../styles/pages/home";
-
-import Stripe from "stripe";
 import useEmblaCarousel from "embla-carousel-react";
+import { stripe } from "../lib/stripe";
+import Stripe from "stripe";
 import { CartButton } from "../components/CartButton";
 
+import { HomeContainer, Product, SliderContainer } from "../styles/pages/home";
+import { useCart } from "../hooks/useCart";
+import { IProduct } from "../context/CartContext";
+import { MouseEvent } from "react";
+
 interface HomeProps {
-  products: {
-    id: string;
-    name: string;
-    imageUrl: string;
-    price: string;
-  }[];
+  products: IProduct[];
 }
 
 export default function Home({ products }: HomeProps) {
@@ -26,6 +22,16 @@ export default function Home({ products }: HomeProps) {
     skipSnaps: false,
     dragFree: true,
   });
+
+  const { addToCart } = useCart();
+
+  function handleAddToCart(
+    e: MouseEvent<HTMLButtonElement>,
+    product: IProduct
+  ) {
+    e.preventDefault();
+    addToCart(product);
+  }
 
   return (
     <>
@@ -58,7 +64,11 @@ export default function Home({ products }: HomeProps) {
                           <strong>{product.name}</strong>
                           <span>{product.price}</span>
                         </div>
-                        <CartButton color="green" size="large"/>
+                        <CartButton
+                          color="green"
+                          size="large"
+                          onClick={(e) => handleAddToCart(e, product)}
+                        />
                       </footer>
                     </Product>
                   </Link>
@@ -88,6 +98,8 @@ export const getStaticProps: GetStaticProps = async () => {
         style: "currency",
         currency: "BRL",
       }).format(price.unit_amount / 100),
+      numberPrice: price.unit_amount / 100,
+      defaultPriceId: price.id
     };
   });
 
