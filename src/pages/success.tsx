@@ -35,12 +35,14 @@ export default function Success({
           ))}
         </ImagesContainer>
 
-          <h1>Compra Efetuada!</h1>
+        <h1>Compra Efetuada!</h1>
 
-          <p>
-            Uhuul <strong>{customerName}</strong>, sua compra de{" "}
-            {productsImages.length} já esta a caminho da sua casa.
-          </p>
+        <p>
+          Uhuul <strong>{customerName}</strong>, sua compra de{" "}
+          {productsImages.length}{" "}
+          {productsImages.length === 1 ? "camiseta" : "camisetas"} já esta a
+          caminho da sua casa.
+        </p>
 
         <Link href="/">Voltar ao catálogo</Link>
       </SuccessContainer>
