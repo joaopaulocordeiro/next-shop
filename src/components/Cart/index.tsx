@@ -1,7 +1,9 @@
 import { useCart } from "@/src/hooks/useCart";
 import * as Dialog from "@radix-ui/react-dialog";
+import axios from "axios";
 import Image from "next/image";
 import { X } from "phosphor-react";
+import { useState } from "react";
 import { CartButton } from "../CartButton";
 import {
   CartClose,
@@ -18,10 +20,30 @@ export function Cart() {
 
   const cartQuantity = cartItems.length;
 
-  const formattedCartTotal = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(cartTotal)
+  const formattedCartTotal = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(cartTotal);
+
+  const [isCreatingCheckotSession, setIsCreatingCheckotSession] =
+    useState(false);
+
+  async function handleCheckout() {
+    try {
+      setIsCreatingCheckotSession(true);
+
+      const response = await axios.post("/api/checkout", {
+        products: cartItems,
+      });
+
+      const { checkoutUrl } = response.data;
+
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setIsCreatingCheckotSession(false);
+      alert("falha ao redirecionar ao checkout");
+    }
+  }
 
   return (
     <Dialog.Root>
@@ -53,7 +75,9 @@ export function Cart() {
                 <CartProductDetails>
                   <p>{cartItem.name}</p>
                   <strong>{cartItem.price}</strong>
-                  <button onClick={() => removeCartItem(cartItem.id)}>Remover</button>
+                  <button onClick={() => removeCartItem(cartItem.id)}>
+                    Remover
+                  </button>
                 </CartProductDetails>
               </CartProduct>
             ))}
@@ -62,14 +86,21 @@ export function Cart() {
             <FinalizationDetails>
               <div>
                 <span>Quantidade</span>
-                <p>{cartQuantity} {cartQuantity === 1 ? 'item' : 'itens'}</p>
+                <p>
+                  {cartQuantity} {cartQuantity === 1 ? "item" : "itens"}
+                </p>
               </div>
               <div>
                 <span>Valor total</span>
                 <p>{formattedCartTotal}</p>
               </div>
             </FinalizationDetails>
-            <button>Finalizar Compra</button>
+            <button
+              onClick={handleCheckout}
+              disabled={isCreatingCheckotSession || cartQuantity <= 0}
+            >
+              Finalizar Compra
+            </button>
           </CartFinalization>
         </CartContainer>
       </Dialog.Portal>
