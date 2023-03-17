@@ -10,18 +10,27 @@ import { CartButton } from "../components/CartButton";
 import { HomeContainer, Product, SliderContainer } from "../styles/pages/home";
 import { useCart } from "../hooks/useCart";
 import { IProduct } from "../context/CartContext";
-import { MouseEvent } from "react";
+import { MouseEvent, useEffect, useState } from "react";
+import { ProductSkeleton } from "../components/ProductSkeleton";
 
 interface HomeProps {
   products: IProduct[];
 }
 
 export default function Home({ products }: HomeProps) {
+  const [isLoading, setIsLoading] = useState(true);
   const [emblaRef] = useEmblaCarousel({
     align: "start",
     skipSnaps: false,
     dragFree: true,
   });
+
+  useEffect(() => {
+    //fake loading
+    const timeOut = setTimeout(() => setIsLoading(false), 2000);
+
+    return () => clearTimeout(timeOut);
+  }, []);
 
   const { addToCart, checktIfItemAlreadyExists } = useCart();
 
@@ -42,39 +51,49 @@ export default function Home({ products }: HomeProps) {
         <HomeContainer>
           <div className="embla" ref={emblaRef}>
             <SliderContainer className="embla__container container">
-              {products.map((product) => {
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/product/${product.id}`}
-                    prefetch={false}
-                  >
-                    <Product className="embla__slide">
-                      <Image
-                        src={product.imageUrl}
-                        width={520}
-                        height={480}
-                        alt="camiseta1"
-                        placeholder="blur"
-                        blurDataURL="/assets/camisetas/1.png"
-                      />
+              {isLoading ? (
+                <>
+                  <ProductSkeleton className="emblar__slide" />
+                  <ProductSkeleton className="emblar__slide" />
+                  <ProductSkeleton className="emblar__slide" />
+                </>
+              ) : (
+                <>
+                  {products.map((product) => {
+                    return (
+                      <Link
+                        key={product.id}
+                        href={`/product/${product.id}`}
+                        prefetch={false}
+                      >
+                        <Product className="embla__slide">
+                          <Image
+                            src={product.imageUrl}
+                            width={520}
+                            height={480}
+                            alt="camiseta1"
+                            placeholder="blur"
+                            blurDataURL="/assets/camisetas/1.png"
+                          />
 
-                      <footer>
-                        <div>
-                          <strong>{product.name}</strong>
-                          <span>{product.price}</span>
-                        </div>
-                        <CartButton
-                          color="green"
-                          size="large"
-                          disabled={checktIfItemAlreadyExists(product.id)}
-                          onClick={(e) => handleAddToCart(e, product)}
-                        />
-                      </footer>
-                    </Product>
-                  </Link>
-                );
-              })}
+                          <footer>
+                            <div>
+                              <strong>{product.name}</strong>
+                              <span>{product.price}</span>
+                            </div>
+                            <CartButton
+                              color="green"
+                              size="large"
+                              disabled={checktIfItemAlreadyExists(product.id)}
+                              onClick={(e) => handleAddToCart(e, product)}
+                            />
+                          </footer>
+                        </Product>
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
             </SliderContainer>
           </div>
         </HomeContainer>
@@ -100,7 +119,7 @@ export const getStaticProps: GetStaticProps = async () => {
         currency: "BRL",
       }).format(price.unit_amount / 100),
       numberPrice: price.unit_amount / 100,
-      defaultPriceId: price.id
+      defaultPriceId: price.id,
     };
   });
 
